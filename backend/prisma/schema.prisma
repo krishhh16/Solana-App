@@ -19,12 +19,20 @@ model User {
   tasks   Task[]
 }
 
+model Worker {
+  id            Int           @id @default(autoincrement())
+  address       String        @unique
+  submissions   Sumbissions[]
+  amount        String
+  locked_amount String
+}
+
 model Task {
-  id      Int      @id @default(autoincrement())
-  title   String
-  options Option[]
-  userId  Int
-  user    User     @relation(fields: [userId], references: [id])
+  id          Int           @id @default(autoincrement())
+  title       String
+  options     Option[]
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id])
   submissions Sumbissions[]
 }
 
@@ -37,18 +45,13 @@ model Option {
   submissions Sumbissions[]
 }
 
-model Worker {
-  id          Int           @id @default(autoincrement())
-  address     String        @unique
-  submissions Sumbissions[]
-}
-
 model Sumbissions {
   id        Int    @id @default(autoincrement())
   worker_id Int
   worker    Worker @relation(fields: [worker_id], references: [id])
   option_id Int
   option    Option @relation(fields: [option_id], references: [id])
-  task_id   Int 
-  task      Task @relation(fields: [task_id], references: [id])
+  task_id   Int
+  task      Task   @relation(fields: [task_id], references: [id])
+  amount    String
 }
