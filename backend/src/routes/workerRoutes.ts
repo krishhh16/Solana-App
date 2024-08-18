@@ -81,7 +81,7 @@ route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
         }
         const amount = (Number(tasks.amount) / 100);
         const submission =  await prisma.$transaction(async tx => {
-            const submission= await prisma.sumbissions.create({
+            const submission= await tx.sumbissions.create({
                 data: {
                     option_id: Number(parsedData.data.selection),
                     worker_id: userId,
@@ -91,13 +91,13 @@ route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
             })
 
 
-            await prisma.worker.update({
+            await tx.worker.update({
                 where: {
                     id: userId
                 },
                 data: {
                     pendingAmount: {
-                        increment: Number(amount) * TOTAL_DECIMALS
+                        increment: Number(amount) 
                     }
                 }
             })
@@ -120,7 +120,6 @@ route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
 
 })
 
-
 route.get("/balance", authMiddleWareWorkers, async (req, res) => {
     //@ts-ignore
     const userId: string = req.userId;
@@ -134,6 +133,53 @@ route.get("/balance", authMiddleWareWorkers, async (req, res) => {
     res.json({
         pendingAmount: worker?.pendingAmount,
         lockedAmount: worker?.lockedAmount
+    })
+})
+
+route.post("/payout", authMiddleWareWorkers, async (req, res) => {
+    //@ts-ignore 
+    const userId = req.userId;
+    const worker = await prisma.worker.findFirst({
+        where: {id: Number(userId)}
+    })
+
+    if (!worker) {
+        res.json({
+            msg: "Invalid worker"
+        })
+    }
+
+    const address = worker?.address;
+    const txnId = "0x5555";
+
+    await prisma.$transaction(async tx => {
+        await tx.worker.update({
+            where: {
+                id: userId
+            }, 
+            data: {
+                pendingAmount: {
+                    decrement: worker?.pendingAmount
+                },
+                lockedAmount: {
+                    increment: worker?.lockedAmount
+                }
+            }
+        })
+
+        await tx.payout.create({
+            data: {
+                userId,
+                amount: worker?.pendingAmount as number,
+                status: "Processing",
+                signature: txnId,
+            }
+        })
+    })
+
+    res.json({
+        msg: "Processing Payout",
+        amount: worker?.pendingAmount
     })
 })
 

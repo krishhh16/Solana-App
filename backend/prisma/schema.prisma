@@ -14,9 +14,10 @@ datasource db {
 }
 
 model User {
-  id      Int    @id @default(autoincrement())
-  address String @unique
+  id      Int      @id @default(autoincrement())
+  address String   @unique
   tasks   Task[]
+  Payout  Payout[]
 }
 
 model Worker {
@@ -33,7 +34,7 @@ model Task {
   options     Option[]
   userId      Int
   user        User          @relation(fields: [userId], references: [id])
-  done        Boolean       @default(false )
+  done        Boolean       @default(false)
   submissions Sumbissions[]
   amount      Int
   signature   String
@@ -56,5 +57,21 @@ model Sumbissions {
   task_id   Int
   task      Task   @relation(fields: [task_id], references: [id])
   amount    Int
+
   @@unique([worker_id, task_id])
+}
+
+model Payout {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  amount    Int
+  signature String
+  status    TxnStatus
+}
+
+enum TxnStatus {
+  Processing
+  Success
+  Failure
 }
