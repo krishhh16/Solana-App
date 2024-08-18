@@ -5,6 +5,7 @@ import { authMiddleWare } from "./middlewares";
 
 import { PrismaClient } from "@prisma/client";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { taskUserInput } from "../types/types";
 const route = Router();
 //@ts-ignore
 const s3Client = new S3Client({
@@ -73,6 +74,49 @@ route.get("/v1/getPresignedUrl", authMiddleWare, async (req, res) => {
         preSignedUrl: url,
         fields   
     })
+})
+
+route.post("/task", async (req, res) => {
+    const body = req.body;
+    // @ts-ignore
+    const userId = req.userId;
+
+    const parseData = taskUserInput.safeParse(body);
+
+    if (!parseData.success){
+        res.json({
+            msg: "Invalid input type"
+        })
+    }
+
+    // Parse the sig here to ensure identity and amount 
+
+    const respone= await prisma.$transaction(async tx => {
+        const response = await tx.task.create({
+            data: {
+                title: parseData.data?.title,
+                amount: "1",
+                signature: parseData.data?.signature || "signature",
+                userId,
+            }
+        })
+
+        await tx.option.createMany({
+            //@ts-ignore Need to take care of it
+            data: parseData.data?.options.map(x => ({
+                image_url: x.imageUrl,
+                taskId: response.id
+            }))
+        })
+        
+        return response;
+    })
+
+    res.json({
+        id: respone.id
+    })
+
+
 })
 
 export default route;

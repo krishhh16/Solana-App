@@ -29,17 +29,18 @@ model Worker {
 
 model Task {
   id          Int           @id @default(autoincrement())
-  title       String
+  title       String?       @default("Choose the best thumbnails amongst the provided ones:")
   options     Option[]
   userId      Int
   user        User          @relation(fields: [userId], references: [id])
   submissions Sumbissions[]
+  amount      String
+  signature   String
 }
 
 model Option {
   id          Int           @id @default(autoincrement())
   image_url   String
-  option_id   Int
   taskId      Int
   task        Task          @relation(fields: [taskId], references: [id])
   submissions Sumbissions[]
