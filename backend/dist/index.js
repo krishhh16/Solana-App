@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const workerRoutes_1 = __importDefault(require("./routes/workerRoutes"));
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
 app.use("/user", userRoutes_1.default);
 app.use("/worker", workerRoutes_1.default);
 app.listen(3001, () => {

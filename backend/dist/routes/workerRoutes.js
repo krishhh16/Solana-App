@@ -19,23 +19,23 @@ const route = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
 route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const walletAddress = "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37";
-    const existingUser = yield prisma.user.findFirst({
+    const existingUser = yield prisma.worker.findFirst({
         where: { address: walletAddress }
     });
     if (existingUser) {
         const token = jsonwebtoken_1.default.sign({
-            address: walletAddress
+            userId: existingUser.id
         }, "Some secret key");
         res.json({ token });
     }
     else {
-        yield prisma.user.create({
+        const someUser = yield prisma.worker.create({
             data: {
                 address: walletAddress
             }
         });
         const token = jsonwebtoken_1.default.sign({
-            address: walletAddress
+            userId: someUser.id
         }, "Some secret key");
         res.json({ token });
     }

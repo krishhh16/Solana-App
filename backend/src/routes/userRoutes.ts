@@ -43,7 +43,8 @@ route.post('/v1/signin', async (req, res) => {
         })
         const token = jwt.sign({
             userId: someUser.id
-        }, "Some secret key")
+            //@ts-ignore
+        }, process.env.JWT_SECRET)
 
         res.json({
             token
@@ -76,7 +77,7 @@ route.get("/v1/getPresignedUrl", authMiddleWare, async (req, res) => {
     })
 })
 
-route.post("/task", async (req, res) => {
+route.post("/task", authMiddleWare, async (req, res) => {
     const body = req.body;
     // @ts-ignore
     const userId = req.userId;
@@ -94,7 +95,7 @@ route.post("/task", async (req, res) => {
     const respone= await prisma.$transaction(async tx => {
         const response = await tx.task.create({
             data: {
-                title: parseData.data?.title,
+                title:"Click on the most clickable thumbnail",
                 amount: "1",
                 signature: parseData.data?.signature || "signature",
                 userId,

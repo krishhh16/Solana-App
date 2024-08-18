@@ -1,7 +1,115 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const userRoute = (0, express_1.Router)();
-userRoute.post('/v1/signin', (req, res) => {
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const client_s3_1 = require("@aws-sdk/client-s3");
+const middlewares_1 = require("./middlewares");
+const client_1 = require("@prisma/client");
+const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
+const types_1 = require("../types/types");
+const route = (0, express_1.Router)();
+//@ts-ignore
+const s3Client = new client_s3_1.S3Client({
+    credentials: {
+        accessKeyId: process.env.AMAZON_ACCESS_KEY,
+        secretAccessKey: process.env.AMAZON_SECRET_KEY
+    },
+    region: "eu-north-1"
 });
-exports.default = userRoute;
+const prisma = new client_1.PrismaClient();
+route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const walletAddress = "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37";
+    const existingUser = yield prisma.user.findFirst({
+        where: { address: walletAddress }
+    });
+    if (existingUser) {
+        const token = jsonwebtoken_1.default.sign({
+            userId: existingUser.id
+            //@ts-ignore
+        }, process.env.JWT_SECRET);
+        res.json({
+            token
+        });
+    }
+    else {
+        const someUser = yield prisma.user.create({
+            data: {
+                address: walletAddress
+            }
+        });
+        const token = jsonwebtoken_1.default.sign({
+            userId: someUser.id
+            //@ts-ignore
+        }, process.env.JWT_SECRET);
+        res.json({
+            token
+        });
+    }
+}));
+route.get("/v1/getPresignedUrl", middlewares_1.authMiddleWare, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // @ts-ignore
+    const userId = req.userId;
+    const { url, fields } = yield (0, s3_presigned_post_1.createPresignedPost)(s3Client, {
+        Bucket: "decentralized-feverrr",
+        Key: `images/${userId}/${Math.random()}/image.jpg`,
+        Conditions: [
+            ["content-length-range", 0, 5 * 1024 * 1024] // 5 mb max
+        ],
+        Fields: {
+            "Content-Type": 'image/jpg'
+        },
+        Expires: 3600
+    });
+    console.log(url, fields);
+    res.json({
+        preSignedUrl: url,
+        fields
+    });
+}));
+route.post("/task", middlewares_1.authMiddleWare, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const body = req.body;
+    // @ts-ignore
+    const userId = req.userId;
+    const parseData = types_1.taskUserInput.safeParse(body);
+    if (!parseData.success) {
+        res.json({
+            msg: "Invalid input type"
+        });
+    }
+    // Parse the sig here to ensure identity and amount 
+    const respone = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b;
+        const response = yield tx.task.create({
+            data: {
+                title: "Click on the most clickable thumbnail",
+                amount: "1",
+                signature: ((_a = parseData.data) === null || _a === void 0 ? void 0 : _a.signature) || "signature",
+                userId,
+            }
+        });
+        yield tx.option.createMany({
+            //@ts-ignore Need to take care of it
+            data: (_b = parseData.data) === null || _b === void 0 ? void 0 : _b.options.map(x => ({
+                image_url: x.imageUrl,
+                taskId: response.id
+            }))
+        });
+        return response;
+    }));
+    res.json({
+        id: respone.id
+    });
+}));
+exports.default = route;

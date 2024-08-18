@@ -3,7 +3,6 @@ import jwt, { JwtPayload } from "jsonwebtoken"
 
 export function authMiddleWare(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.header("Authorization") ?? "";
-
     try {
         // @ts-ignore
         const decoded = jwt.verify(authHeader, process.env.JWT_SECRET) as JwtPayload;
@@ -17,7 +16,8 @@ export function authMiddleWare(req: Request, res: Response, next: NextFunction) 
                 msg: "You are not logged in"
             })
         }
-    } catch (err) {
+    } catch (err: any) {
+        console.log(err.message)
         res.status(404).json({
             msg: "You are not authorized for this task"
         })

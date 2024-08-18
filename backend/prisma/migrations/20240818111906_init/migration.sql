@@ -19,8 +19,10 @@ CREATE TABLE "Worker" (
 -- CreateTable
 CREATE TABLE "Task" (
     "id" SERIAL NOT NULL,
-    "title" TEXT NOT NULL,
+    "title" TEXT DEFAULT 'Choose the best thumbnails amongst the provided ones:',
     "userId" INTEGER NOT NULL,
+    "amount" TEXT NOT NULL,
+    "signature" TEXT NOT NULL,
 
     CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
 );
@@ -29,7 +31,6 @@ CREATE TABLE "Task" (
 CREATE TABLE "Option" (
     "id" SERIAL NOT NULL,
     "image_url" TEXT NOT NULL,
-    "option_id" INTEGER NOT NULL,
     "taskId" INTEGER NOT NULL,
 
     CONSTRAINT "Option_pkey" PRIMARY KEY ("id")
