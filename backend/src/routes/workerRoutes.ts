@@ -79,7 +79,7 @@ route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
                 msg: "incorrect taskId"
             })
         }
-        const amount = (Number(tasks.amount) / 100).toString();
+        const amount = (Number(tasks.amount) / 100);
         const submission =  await prisma.$transaction(async tx => {
             const submission= await prisma.sumbissions.create({
                 data: {
@@ -120,6 +120,22 @@ route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
 
 })
 
+
+route.get("/balance", authMiddleWareWorkers, async (req, res) => {
+    //@ts-ignore
+    const userId: string = req.userId;
+
+    const worker = await prisma.worker.findFirst({
+        where: {
+            id: Number(userId)
+        }
+    })
+
+    res.json({
+        pendingAmount: worker?.pendingAmount,
+        lockedAmount: worker?.lockedAmount
+    })
+})
 
 
 export default route;
