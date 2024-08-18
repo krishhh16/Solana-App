@@ -1,7 +1,7 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { authMiddleWare } from "./middlewares";
+import { authMiddleWareUser } from "./middlewares";
 
 import { PrismaClient } from "@prisma/client";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
@@ -29,7 +29,7 @@ route.post('/v1/signin', async (req, res) => {
         const token = jwt.sign({
             userId: existingUser.id
             //@ts-ignore
-        }, process.env.JWT_SECRET)
+        }, process.env.JWT_SECRET_USER)
 
         res.json({
             token
@@ -44,7 +44,7 @@ route.post('/v1/signin', async (req, res) => {
         const token = jwt.sign({
             userId: someUser.id
             //@ts-ignore
-        }, process.env.JWT_SECRET)
+        }, process.env.JWT_SECRET_USER)
 
         res.json({
             token
@@ -53,7 +53,7 @@ route.post('/v1/signin', async (req, res) => {
 
 })
 
-route.get("/v1/getPresignedUrl", authMiddleWare, async (req, res) => {
+route.get("/v1/getPresignedUrl", authMiddleWareUser, async (req, res) => {
     // @ts-ignore
     const userId = req.userId;
 
@@ -77,7 +77,7 @@ route.get("/v1/getPresignedUrl", authMiddleWare, async (req, res) => {
     })
 })
 
-route.post("/task", authMiddleWare, async (req, res) => {
+route.post("/task", authMiddleWareUser, async (req, res) => {
     const body = req.body;
     // @ts-ignore
     const userId = req.userId;
@@ -120,19 +120,27 @@ route.post("/task", authMiddleWare, async (req, res) => {
 
 })
 
-route.get('/task', async (req, res) => {
+route.get('/task', authMiddleWareUser, async (req, res) => {
     //@ts-ignore
     const taskId: string = req.query.taskId;
     // @ts-ignore
     const userId: string = req.userId;
 
+
+    // Find the first task with the provided taskId and only include the options parameter
     const taskDetails = await prisma.task.findFirst( {
         where: {
             userId: Number(userId),
             id: Number(taskId)
+        },
+        include: {
+            options: true
         }
     })
 
+    console.log(taskDetails);
+        
+    // Get all the submissions for the specified task_id and include the option
     const response = await prisma.sumbissions.findMany({
         where: {
             task_id: Number(taskId)
@@ -149,17 +157,21 @@ route.get('/task', async (req, res) => {
         }
     }>  = {};
 
-    response.forEach(r => {
-        if (!result[r.option_id]) {
-            result[r.option_id] = {
-                count: 1,
-                tasks: {
-                    imageUrl: r.option.image_url
-                }
+
+    taskDetails?.options.forEach(option => {
+        result[option.id] = {
+            count: 0,
+            tasks: {
+                imageUrl: option.image_url
             }
-        } else {
-            result[r.option_id].count++;
         }
+    })
+
+
+    response.forEach(r => {
+        
+        result[r.option_id].count++;
+        
     })
 
     res.json({

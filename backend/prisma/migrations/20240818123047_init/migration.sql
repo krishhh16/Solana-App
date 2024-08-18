@@ -10,8 +10,8 @@ CREATE TABLE "User" (
 CREATE TABLE "Worker" (
     "id" SERIAL NOT NULL,
     "address" TEXT NOT NULL,
-    "amount" TEXT NOT NULL DEFAULT '0',
-    "locked_amount" TEXT NOT NULL DEFAULT '0',
+    "pendingAmount" INTEGER NOT NULL,
+    "lockedAmount" INTEGER NOT NULL,
 
     CONSTRAINT "Worker_pkey" PRIMARY KEY ("id")
 );

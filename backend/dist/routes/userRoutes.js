@@ -112,4 +112,45 @@ route.post("/task", middlewares_1.authMiddleWare, (req, res) => __awaiter(void 0
         id: respone.id
     });
 }));
+route.get('/task', middlewares_1.authMiddleWare, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //@ts-ignore
+    const taskId = req.query.taskId;
+    // @ts-ignore
+    const userId = req.userId;
+    // Find the first task with the provided taskId and only include the options parameter
+    const taskDetails = yield prisma.task.findFirst({
+        where: {
+            userId: Number(userId),
+            id: Number(taskId)
+        },
+        include: {
+            options: true
+        }
+    });
+    console.log(taskDetails);
+    // Get all the submissions for the specified task_id and include the option
+    const response = yield prisma.sumbissions.findMany({
+        where: {
+            task_id: Number(taskId)
+        },
+        include: {
+            option: true
+        }
+    });
+    const result = {};
+    taskDetails === null || taskDetails === void 0 ? void 0 : taskDetails.options.forEach(option => {
+        result[option.id] = {
+            count: 0,
+            tasks: {
+                imageUrl: option.image_url
+            }
+        };
+    });
+    response.forEach(r => {
+        result[r.option_id].count++;
+    });
+    res.json({
+        result
+    });
+}));
 exports.default = route;

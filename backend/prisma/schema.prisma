@@ -23,8 +23,8 @@ model Worker {
   id            Int           @id @default(autoincrement())
   address       String        @unique
   submissions   Sumbissions[]
-  amount        String        @default("0")
-  locked_amount String        @default("0")
+  pendingAmount Int
+  lockedAmount  Int
 }
 
 model Task {

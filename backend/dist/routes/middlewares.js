@@ -8,7 +8,6 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function authMiddleWare(req, res, next) {
     var _a;
     const authHeader = (_a = req.header("Authorization")) !== null && _a !== void 0 ? _a : "";
-    console.log(process.env.JWT_SECRET, authHeader);
     try {
         // @ts-ignore
         const decoded = jsonwebtoken_1.default.verify(authHeader, process.env.JWT_SECRET);

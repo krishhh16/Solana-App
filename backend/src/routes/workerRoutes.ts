@@ -14,20 +14,30 @@ route.post('/v1/signin', async (req, res) => {
     if (existingUser) {
         const token = jwt.sign({
             userId: existingUser.id
-        }, "Some secret key")
-        res.json({token})
+            //@ts-ignore
+        }, process.env.JWT_SECRET_WORKER)
+
+        res.json({
+            token
+        })
     } else {
+
         const someUser = await prisma.worker.create({
             data: {
-                address: walletAddress
+                address: walletAddress,
+                pendingAmount: 0,
+                lockedAmount: 0
             }
         })
         const token = jwt.sign({
             userId: someUser.id
-        }, "Some secret key")
+            //@ts-ignore
+        }, process.env.JWT_SECRET_WORKER)
 
-        res.json({token})
-    }
+        res.json({
+            token
+        })
+        }
 
 })
 
