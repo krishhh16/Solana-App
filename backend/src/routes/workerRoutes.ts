@@ -53,7 +53,7 @@ route.get("/v1/nextTasks", authMiddleWareWorkers, async (req, res) => {
     const tasks = await getTasks(userId);
 
     console.log(tasks)
-
+    
     if (!tasks) {
         res.json({
             msg: "You do not have any taskss left anymore"

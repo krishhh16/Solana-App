@@ -19,6 +19,7 @@ const middlewares_1 = require("./middlewares");
 const client_1 = require("@prisma/client");
 const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
 const types_1 = require("../types/types");
+const workerRoutes_1 = require("./workerRoutes");
 const route = (0, express_1.Router)();
 //@ts-ignore
 const s3Client = new client_s3_1.S3Client({
@@ -94,7 +95,7 @@ route.post("/task", middlewares_1.authMiddleWareUser, (req, res) => __awaiter(vo
         const response = yield tx.task.create({
             data: {
                 title: "Click on the most clickable thumbnail",
-                amount: "1",
+                amount: 1 * workerRoutes_1.TOTAL_DECIMALS,
                 signature: ((_a = parseData.data) === null || _a === void 0 ? void 0 : _a.signature) || "signature",
                 userId,
             }
