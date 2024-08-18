@@ -35,7 +35,7 @@ model Task {
   user        User          @relation(fields: [userId], references: [id])
   done        Boolean       @default(false )
   submissions Sumbissions[]
-  amount      String
+  amount      Int
   signature   String
 }
 
@@ -56,4 +56,5 @@ model Sumbissions {
   task_id   Int
   task      Task   @relation(fields: [task_id], references: [id])
   amount    String
+  @@unique([worker_id, task_id])
 }

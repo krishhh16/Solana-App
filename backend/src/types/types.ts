@@ -7,3 +7,9 @@ export const taskUserInput = z.object({
     title: z.string().optional(),
     signature: z.string()
 })
+
+
+export const submissionUserInput = z.object({
+    taskId: z.string(),
+    selection: z.string()
+})

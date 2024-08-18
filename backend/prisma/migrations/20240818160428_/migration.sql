@@ -21,7 +21,8 @@ CREATE TABLE "Task" (
     "id" SERIAL NOT NULL,
     "title" TEXT DEFAULT 'Choose the best thumbnails amongst the provided ones:',
     "userId" INTEGER NOT NULL,
-    "amount" TEXT NOT NULL,
+    "done" BOOLEAN NOT NULL DEFAULT false,
+    "amount" INTEGER NOT NULL,
     "signature" TEXT NOT NULL,
 
     CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
@@ -52,6 +53,9 @@ CREATE UNIQUE INDEX "User_address_key" ON "User"("address");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Worker_address_key" ON "Worker"("address");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Sumbissions_worker_id_task_id_key" ON "Sumbissions"("worker_id", "task_id");
 
 -- AddForeignKey
 ALTER TABLE "Task" ADD CONSTRAINT "Task_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -6,6 +6,7 @@ import { authMiddleWareUser } from "./middlewares";
 import { PrismaClient } from "@prisma/client";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { taskUserInput } from "../types/types";
+import { TOTAL_DECIMALS } from "./workerRoutes";
 const route = Router();
 //@ts-ignore
 const s3Client = new S3Client({
@@ -96,7 +97,7 @@ route.post("/task", authMiddleWareUser, async (req, res) => {
         const response = await tx.task.create({
             data: {
                 title:"Click on the most clickable thumbnail",
-                amount: "1",
+                amount: 1 * TOTAL_DECIMALS,
                 signature: parseData.data?.signature || "signature",
                 userId,
             }

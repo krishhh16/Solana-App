@@ -2,7 +2,11 @@ import { Router } from "express";
 import jwt from "jsonwebtoken"
 import { PrismaClient } from "@prisma/client";
 import { authMiddleWareWorkers } from "./middlewares";
+import { getTasks } from "../db";
+import { submissionUserInput } from "../types/types";
 const route = Router();
+
+export const TOTAL_DECIMALS = 100_000_000;
 
 const prisma = new PrismaClient()
 route.post('/v1/signin', async (req, res) => {
@@ -46,20 +50,7 @@ route.get("/v1/nextTasks", authMiddleWareWorkers, async (req, res) => {
     // @ts-ignore
     const userId = req.userId
     console.log(userId);
-    const tasks = await prisma.task.findFirst({
-        where: {
-            submissions: {
-                none: {
-                    worker_id: userId,
-                }
-            }, 
-            done: false
-        },
-        select: {
-            title: true,
-            options: true
-        }       
-    })
+    const tasks = await getTasks(userId);
 
     console.log(tasks)
 
@@ -75,6 +66,59 @@ route.get("/v1/nextTasks", authMiddleWareWorkers, async (req, res) => {
 
 })
 
+route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
+    const body = req.body;
+    //@ts-ignore
+    const userId = req.userId;
+
+    const parsedData = submissionUserInput.safeParse(body);
+    if (parsedData.success) {
+        const tasks = await getTasks(userId);
+        if(!tasks || tasks?.id !== Number(parsedData.data.taskId)){ // Why're we using hte tasks.id's comparision with the provided taskId? isn't tasks going to be the first tasks
+            return res.status(411).json({
+                msg: "incorrect taskId"
+            })
+        }
+        const amount = (Number(tasks.amount) / 100).toString();
+        const submission =  await prisma.$transaction(async tx => {
+            const submission= await prisma.sumbissions.create({
+                data: {
+                    option_id: Number(parsedData.data.selection),
+                    worker_id: userId,
+                    task_id: Number(parsedData.data.taskId),
+                    amount
+                }
+            })
+
+
+            await prisma.worker.update({
+                where: {
+                    id: userId
+                },
+                data: {
+                    pendingAmount: {
+                        increment: Number(amount) * TOTAL_DECIMALS
+                    }
+                }
+            })
+
+            return submission;
+        }) 
+
+
+        const nextTask = getTasks(userId);
+        res.status(200).json({
+            nextTask,
+            amount
+        })
+
+    } else {
+        res.status(401).json({
+            msg: "Invalid user inputs"
+        })
+    }
+
+})
 
 
 
