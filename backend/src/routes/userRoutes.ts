@@ -120,4 +120,53 @@ route.post("/task", authMiddleWare, async (req, res) => {
 
 })
 
+route.get('/task', async (req, res) => {
+    //@ts-ignore
+    const taskId: string = req.query.taskId;
+    // @ts-ignore
+    const userId: string = req.userId;
+
+    const taskDetails = await prisma.task.findFirst( {
+        where: {
+            userId: Number(userId),
+            id: Number(taskId)
+        }
+    })
+
+    const response = await prisma.sumbissions.findMany({
+        where: {
+            task_id: Number(taskId)
+        },
+        include: {
+            option: true
+        }
+    });
+
+    const result: Record<string, {
+        count: number;
+        tasks: {
+            imageUrl: string
+        }
+    }>  = {};
+
+    response.forEach(r => {
+        if (!result[r.option_id]) {
+            result[r.option_id] = {
+                count: 1,
+                tasks: {
+                    imageUrl: r.option.image_url
+                }
+            }
+        } else {
+            result[r.option_id].count++;
+        }
+    })
+
+    res.json({
+        result
+    })
+
+})
+
+
 export default route;
