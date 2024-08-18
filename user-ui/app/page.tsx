@@ -30,14 +30,19 @@ export default function Home() {
   }
   return (
     <div className="w-full h-screen">
-      <div className="flex gap-4  justify-center h-[10vh] items-center ">
-        <h1 className="font-bold ">
-          Connected Wallet :
-        </h1>
-        <WalletMultiButton style={{}}/>
+      <div className="flex p-10  justify-between h-[10vh] items-center ">
+        <div>
+          <h1 className="font-extrabold text-xl">
+            ExcelliPost
+          </h1>
+        </div>
+        <div className="flex gap-4 items-center">
+          <h1 className="font-bold ">Connected Wallet :</h1>
+          <WalletMultiButton style={{}} />
+        </div>
       </div>
 
-      <AppComponent/>
+      <AppComponent />
     </div>
   );
 }

@@ -6,10 +6,12 @@ import Image from "next/image";
 
 function AppComponent() {
   const [uploading, setUploading] = useState(false);
-
+    const [topic, setTopic] = useState("");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
-
+  const setTitle = (e: any) => {
+    setTopic(e.target.value)
+  }
   const onFileSelect = async (e: any) => {
     setUploading(true);
     try {
@@ -42,9 +44,10 @@ function AppComponent() {
 
       const response2 = await axios.post(presignedUrl, formData);
 
-      setImageUrls((prevStates) => 
-        [...prevStates, `https://d3iizno61g6c3a.cloudfront.net/${response.data.fields.key}`]
-      )
+      setImageUrls((prevStates) => [
+        ...prevStates,
+        `https://d3iizno61g6c3a.cloudfront.net/${response.data.fields.key}`,
+      ]);
       setUploading(false);
     } catch (err) {
       console.log(err);
@@ -60,8 +63,9 @@ function AppComponent() {
   });
 
   return (
-    <div className="w-full h-full ">
-      <ImageGrid urls={imageUrls}/>
+    <div className="w-full h-full pt-10">
+        <LabeledInput label="Title" value={topic} onChange={setTitle} placeholder="" type="text"  />
+      <ImageGrid urls={imageUrls} />
       <div className="flex justify-center mx-auto items-center w-[50%] h-[10%]">
         <div className="w-[20%] h-full border-2 border-slate-400 ">
           {uploading ? (
@@ -79,6 +83,9 @@ function AppComponent() {
               />
             </div>
           )}
+          <h1 className="text-center">
+            Add new files
+          </h1>
         </div>
       </div>
     </div>
@@ -107,10 +114,27 @@ const ImageGrid = ({ urls }: { urls: string[] | undefined }) => {
             src={url}
             alt={`Image ${index + 1}`}
             className="w-full h-full object-cover rounded-md shadow-md"
-
           />
         </div>
       ))}
     </div>
   );
 };
+
+const LabeledInput = ({ label, value, onChange, type = 'text', placeholder = '' }: {label: string, value: string, onChange: any, type: string, placeholder: string}) => {
+    return (
+      <div className="mb-4">
+        <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor={label}>
+          {label}
+        </label>
+        <input
+          id={label}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className="shadow appearance-none border rounded w-1/2 text-left py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+    );
+  };
