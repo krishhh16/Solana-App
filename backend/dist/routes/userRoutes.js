@@ -38,7 +38,7 @@ route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, functio
         const token = jsonwebtoken_1.default.sign({
             userId: existingUser.id
             //@ts-ignore
-        }, process.env.JWT_SECRET);
+        }, process.env.JWT_SECRET_USER);
         res.json({
             token
         });
@@ -52,13 +52,13 @@ route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, functio
         const token = jsonwebtoken_1.default.sign({
             userId: someUser.id
             //@ts-ignore
-        }, process.env.JWT_SECRET);
+        }, process.env.JWT_SECRET_USER);
         res.json({
             token
         });
     }
 }));
-route.get("/v1/getPresignedUrl", middlewares_1.authMiddleWare, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+route.get("/v1/getPresignedUrl", middlewares_1.authMiddleWareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // @ts-ignore
     const userId = req.userId;
     const { url, fields } = yield (0, s3_presigned_post_1.createPresignedPost)(s3Client, {
@@ -78,7 +78,7 @@ route.get("/v1/getPresignedUrl", middlewares_1.authMiddleWare, (req, res) => __a
         fields
     });
 }));
-route.post("/task", middlewares_1.authMiddleWare, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+route.post("/task", middlewares_1.authMiddleWareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     // @ts-ignore
     const userId = req.userId;
@@ -112,7 +112,7 @@ route.post("/task", middlewares_1.authMiddleWare, (req, res) => __awaiter(void 0
         id: respone.id
     });
 }));
-route.get('/task', middlewares_1.authMiddleWare, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+route.get('/task', middlewares_1.authMiddleWareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //@ts-ignore
     const taskId = req.query.taskId;
     // @ts-ignore
