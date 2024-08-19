@@ -3,18 +3,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { LoadingBar } from "./Loading";
 
 function AppComponent() {
   const [uploading, setUploading] = useState(false);
   const [topic, setTopic] = useState("Choose the best thumbnail");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const router = useRouter();
   const setTitle = (e: any) => {
     setTopic(e.target.value);
   };
 
   const handleSubmit = async () => {
-    const options = imageUrls.map((url) => {
+    setIsSubmitting(true)
+    try {const options = imageUrls.map((url) => {
         return {
             imageUrl: url
         }
@@ -32,10 +35,15 @@ function AppComponent() {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcyNDAxNjQ1MX0._T58FEQ6RuKIpEGriTicNIWOSIli-Rt6Q50AEJpIle0",
         },
       })
-
+      setIsSubmitting(false);
     console.log(response.data)
-
+      
     router.push(`/task/${response.data.id}`)
+  } catch(err) {
+    setIsSubmitting(false)
+    alert("Some Unexpected error occured")
+
+  }
 
   }
 
@@ -106,19 +114,14 @@ function AppComponent() {
         type="text"
       />
 
-    <h1 className="font-bold text-xl">
+      <h1 className="font-bold text-xl">
         Create Task:
-    </h1>
+      </h1>
 
       <ImageGrid urls={imageUrls} />
       <div className="flex justify-center mx-auto items-center w-[50%] h-[10%]">
         <div className="w-[20%] h-full border-2 border-slate-400 ">
-          {uploading ? (
-            <div className="min-h-screen flex flex-col items-center justify-center">
-              <LoadingBar progress={progress} />
-              <h1 className="text-2xl mt-4">Loading...</h1>
-            </div>
-          ) : (
+          {!uploading ? (
             <div className="relative flex justify-center items-center w-full h-full">
               +
               <input
@@ -127,14 +130,28 @@ function AppComponent() {
                 onChange={onFileSelect}
               />
             </div>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center">
+              <LoadingBar progress={progress} />
+              <h1 className="text-2xl mt-4">Loading...</h1>
+            </div>
           )}
           <h1 className="text-center">Add new files</h1>
         </div>
       </div>
-      <div className="w-full flex justify-center mt-10">
-        <button onClick={handleSubmit} className="bg-slate-500 w-36 h-10">
-            Sumbit Task
+      <div className="w-full flex flex-col items-center mt-10">
+        <button 
+          onClick={handleSubmit} 
+          className="bg-slate-500 w-36 h-10 text-white disabled:bg-slate-300"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Submitting...' : 'Submit Task'}
         </button>
+        {isSubmitting && (
+          <div className="w-64 mt-4">
+            <LoadingBar progress={progress} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -142,16 +159,6 @@ function AppComponent() {
 
 export default AppComponent;
 
-function LoadingBar({ progress }: { progress: number }) {
-  return (
-    <div className="w-full h-2 bg-gray-200">
-      <div
-        className="h-2 bg-blue-500 transition-all duration-300 ease-out"
-        style={{ width: `${progress}%` }}
-      ></div>
-    </div>
-  );
-}
 
 const ImageGrid = ({ urls }: { urls: string[] | undefined }) => {
   return (
