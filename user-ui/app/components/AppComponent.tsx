@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 function AppComponent() {
   const [uploading, setUploading] = useState(false);
   const [topic, setTopic] = useState("Choose the best thumbnail");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-
+  const router = useRouter();
   const setTitle = (e: any) => {
     setTopic(e.target.value);
   };
@@ -25,7 +26,17 @@ function AppComponent() {
         signature: "0xaaaa"
     }
 
-    const response = await axios.post("http://localhost:3001/user/task", formData)
+    const response = await axios.post("http://localhost:3001/user/task", formData, {
+        headers: {
+          Authorization:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcyNDAxNjQ1MX0._T58FEQ6RuKIpEGriTicNIWOSIli-Rt6Q50AEJpIle0",
+        },
+      })
+
+    console.log(response.data)
+
+    router.push(`/task/${response.data.id}`)
+
   }
 
   const onFileSelect = async (e: any) => {

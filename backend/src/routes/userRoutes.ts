@@ -127,7 +127,6 @@ route.get('/task', authMiddleWareUser, async (req, res) => {
     // @ts-ignore
     const userId: string = req.userId;
 
-    console.log(userId, taskId)
 
     // Find the first task with the provided taskId and only include the options parameter
     const taskDetails = await prisma.task.findFirst( {
@@ -140,7 +139,6 @@ route.get('/task', authMiddleWareUser, async (req, res) => {
         }
     })
 
-    console.log(taskDetails);
         
     // Get all the submissions for the specified task_id and include the option
     const response = await prisma.sumbissions.findMany({
@@ -175,9 +173,10 @@ route.get('/task', authMiddleWareUser, async (req, res) => {
         result[r.option_id].count++;
         
     })
-
+    console.log(result)
     res.json({
-        result
+        result,
+        taskDetails
     })
 
 })

@@ -17,7 +17,7 @@ async function getTasksFromBackend(taskId: string) {
 function TaskId({params: {taskId}}: {params: {taskId: string}}) {
     const [result, setResult] = useState<Record<string, {
         count: number,
-        option: {
+        tasks: {
             imageUrl: string
         }
     }>>({});
@@ -40,9 +40,8 @@ function TaskId({params: {taskId}}: {params: {taskId: string}}) {
             {taskDetails.title}
         </div>
         <div className= "flex justify-center pt-8">
-            {Object.keys(result || {}).map(taskId => <Task imageUrl={result[taskId].option.imageUrl} votes={result[taskId].count} />)}
+            {Object.keys(result || {}).map(taskId => <Task imageUrl={result[taskId].tasks.imageUrl} votes={result[taskId].count} />)}
         </div>
-
     </div>
   )
 }

@@ -118,7 +118,6 @@ route.get('/task', middlewares_1.authMiddleWareUser, (req, res) => __awaiter(voi
     const taskId = req.query.taskId;
     // @ts-ignore
     const userId = req.userId;
-    console.log(userId, taskId);
     // Find the first task with the provided taskId and only include the options parameter
     const taskDetails = yield prisma.task.findFirst({
         where: {
@@ -129,7 +128,6 @@ route.get('/task', middlewares_1.authMiddleWareUser, (req, res) => __awaiter(voi
             options: true
         }
     });
-    console.log(taskDetails);
     // Get all the submissions for the specified task_id and include the option
     const response = yield prisma.sumbissions.findMany({
         where: {
@@ -151,8 +149,10 @@ route.get('/task', middlewares_1.authMiddleWareUser, (req, res) => __awaiter(voi
     response.forEach(r => {
         result[r.option_id].count++;
     });
+    console.log(result);
     res.json({
-        result
+        result,
+        taskDetails
     });
 }));
 exports.default = route;
