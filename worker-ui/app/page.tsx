@@ -1,12 +1,10 @@
 "use client";
 
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 // pages/index.js
-import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import AppComponent from "./components/AppComponent";
 import AppBar from "./components/AppBar";
 import WalletNotConnected from "./components/WalletNotConnected";
+import NextTask from "./components/NextTask"
 export default function Home() {
   const wallet = useWallet();
 
@@ -19,7 +17,7 @@ export default function Home() {
     <div className="w-full h-screen">
       <AppBar/>
 
-      <AppComponent />
+      <NextTask />
     </div>
   );
 }

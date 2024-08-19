@@ -30,7 +30,7 @@ function AppComponent() {
         signature: "0xaaaa"
     }
 
-    const response = await axios.post(`${BACKEND_URL}/user/task"`, formData, {
+    const response = await axios.post(`${BACKEND_URL}/user/v1/task`, formData, {
         headers: {
           Authorization:
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcyNDAxNjQ1MX0._T58FEQ6RuKIpEGriTicNIWOSIli-Rt6Q50AEJpIle0",
@@ -42,7 +42,8 @@ function AppComponent() {
     router.push(`/task/${response.data.id}`)
   } catch(err) {
     setIsSubmitting(false)
-    alert("Some Unexpected error occured")
+    console.log(err)
+    alert("Some Unexpected error occured", err.messages)
 
   }
 

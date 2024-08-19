@@ -70,7 +70,7 @@ route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
     const body = req.body;
     //@ts-ignore
     const userId = req.userId;
-
+    console.log(body)
     const parsedData = submissionUserInput.safeParse(body);
     if (parsedData.success) {
         const tasks = await getTasks(userId);

@@ -74,6 +74,7 @@ route.post("/submission", middlewares_1.authMiddleWareWorkers, (req, res) => __a
     const body = req.body;
     //@ts-ignore
     const userId = req.userId;
+    console.log(body);
     const parsedData = types_1.submissionUserInput.safeParse(body);
     if (parsedData.success) {
         const tasks = yield (0, db_1.getTasks)(userId);

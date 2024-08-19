@@ -79,10 +79,11 @@ route.get("/v1/getPresignedUrl", middlewares_1.authMiddleWareUser, (req, res) =>
         fields
     });
 }));
-route.post("/task", middlewares_1.authMiddleWareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+route.post("/v1/task", middlewares_1.authMiddleWareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const body = req.body;
     // @ts-ignore
     const userId = req.userId;
+    console.log(userId);
     const parseData = types_1.taskUserInput.safeParse(body);
     if (!parseData.success) {
         res.json({

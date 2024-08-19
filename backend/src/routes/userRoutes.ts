@@ -78,11 +78,12 @@ route.get("/v1/getPresignedUrl", authMiddleWareUser, async (req, res) => {
     })
 })
 
-route.post("/task", authMiddleWareUser, async (req, res) => {
+route.post("/v1/task", authMiddleWareUser, async (req, res) => {
     const body = req.body;
     // @ts-ignore
     const userId = req.userId;
 
+    console.log(userId)
     const parseData = taskUserInput.safeParse(body);
 
     if (!parseData.success){
@@ -93,13 +94,14 @@ route.post("/task", authMiddleWareUser, async (req, res) => {
 
     // Parse the sig here to ensure identity and amount 
 
-    const respone= await prisma.$transaction(async tx => {
+    const respone= await prisma.$transaction(async tx => {  
         const response = await tx.task.create({
             data: {
                 title:"Click on the most clickable thumbnail",
                 amount: 1 * TOTAL_DECIMALS,
                 signature: parseData.data?.signature || "signature",
                 userId,
+                
             }
         })
 

@@ -4,7 +4,9 @@ import React from 'react'
 
 function AppComponent() {
   return (
-    <div>AppComponent</div>
+    <div>
+      
+    </div>
   )
 }
 
