@@ -118,6 +118,7 @@ route.get('/task', middlewares_1.authMiddleWareUser, (req, res) => __awaiter(voi
     const taskId = req.query.taskId;
     // @ts-ignore
     const userId = req.userId;
+    console.log(userId, taskId);
     // Find the first task with the provided taskId and only include the options parameter
     const taskDetails = yield prisma.task.findFirst({
         where: {

@@ -2,16 +2,32 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Image from "next/image";
 
 function AppComponent() {
   const [uploading, setUploading] = useState(false);
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState("Choose the best thumbnail");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const setTitle = (e: any) => {
     setTopic(e.target.value);
   };
+
+  const handleSubmit = async () => {
+    const options = imageUrls.map((url) => {
+        return {
+            imageUrl: url
+        }
+    })
+
+    const formData = {
+        options,
+        topic,
+        signature: "0xaaaa"
+    }
+
+    const response = await axios.post("http://localhost:3001/user/task", formData)
+  }
+
   const onFileSelect = async (e: any) => {
     setUploading(true);
     try {
@@ -103,6 +119,11 @@ function AppComponent() {
           )}
           <h1 className="text-center">Add new files</h1>
         </div>
+      </div>
+      <div className="w-full flex justify-center mt-10">
+        <button onClick={handleSubmit} className="bg-slate-500 w-36 h-10">
+            Sumbit Task
+        </button>
       </div>
     </div>
   );

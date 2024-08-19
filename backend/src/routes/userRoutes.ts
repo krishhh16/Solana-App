@@ -127,6 +127,7 @@ route.get('/task', authMiddleWareUser, async (req, res) => {
     // @ts-ignore
     const userId: string = req.userId;
 
+    console.log(userId, taskId)
 
     // Find the first task with the provided taskId and only include the options parameter
     const taskDetails = await prisma.task.findFirst( {
