@@ -5,6 +5,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import AppComponent from "./components/AppComponent";
+import AppBar from "./components/AppBar";
 export default function Home() {
   const wallet = useWallet();
 
@@ -30,17 +31,7 @@ export default function Home() {
   }
   return (
     <div className="w-full h-screen">
-      <div className="flex p-10  justify-between h-[10vh] items-center ">
-        <div>
-          <h1 className="font-extrabold text-xl">
-            ExcelliPost
-          </h1>
-        </div>
-        <div className="flex gap-4 items-center">
-          <h1 className="font-bold ">Connected Wallet :</h1>
-          <WalletMultiButton style={{}} />
-        </div>
-      </div>
+      <AppBar/>
 
       <AppComponent />
     </div>
