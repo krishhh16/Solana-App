@@ -74,6 +74,7 @@ route.post("/submission", middlewares_1.authMiddleWareWorkers, (req, res) => __a
     const body = req.body;
     //@ts-ignore
     const userId = req.userId;
+    console.log(userId);
     console.log(body);
     const parsedData = types_1.submissionUserInput.safeParse(body);
     if (parsedData.success) {
@@ -105,7 +106,7 @@ route.post("/submission", middlewares_1.authMiddleWareWorkers, (req, res) => __a
             });
             return submission;
         }));
-        const nextTask = (0, db_1.getTasks)(userId);
+        const nextTask = yield (0, db_1.getTasks)(userId);
         res.status(200).json({
             nextTask,
             amount

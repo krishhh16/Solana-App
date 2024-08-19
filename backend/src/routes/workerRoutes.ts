@@ -70,6 +70,7 @@ route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
     const body = req.body;
     //@ts-ignore
     const userId = req.userId;
+    console.log(userId)
     console.log(body)
     const parsedData = submissionUserInput.safeParse(body);
     if (parsedData.success) {
@@ -106,7 +107,7 @@ route.post("/submission", authMiddleWareWorkers,  async(req, res) => {
         }) 
 
 
-        const nextTask = getTasks(userId);
+        const nextTask = await getTasks(userId);
         res.status(200).json({
             nextTask,
             amount

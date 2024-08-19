@@ -54,7 +54,7 @@ export default function NextTask() {
                 {currentTask.title}
             </div>
             <div className="flex justify-center gap-10 pt-8">
-                {currentTask.options.map((option) => <Option key={option.id} onSelect={async () =>{
+                {currentTask && currentTask.options.map((option) => <Option key={option.id} onSelect={async () =>{
                     const response = await axios.post(`${BACKEND_URL}/worker/submission`, {
                         taskId: String(currentTask.id),
                         selection: String(option.id)

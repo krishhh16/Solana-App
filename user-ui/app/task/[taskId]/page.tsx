@@ -64,7 +64,7 @@ function TaskId({ params: { taskId } }: { params: { taskId: string } }) {
         )}
       </div>
 
-      <div className="flex justify-center pt-8">
+      <div className="flex justify-center pt-8 gap-10">
         {Object.keys(result || {}).map((taskId, ix) => (
           <Task
             key={ix}
