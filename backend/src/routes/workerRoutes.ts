@@ -4,16 +4,42 @@ import { PrismaClient } from "@prisma/client";
 import { authMiddleWareWorkers } from "./middlewares";
 import { getTasks } from "../db";
 import { submissionUserInput } from "../types/types";
+import nacl from "tweetnacl";
+import { PublicKey } from "@solana/web3.js";
 const route = Router();
 
 export const TOTAL_DECIMALS = 100_000_000;
 
 const prisma = new PrismaClient()
 route.post('/v1/signin', async (req, res) => {
-    const walletAddress = "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37"
+    const {publicKey, signature} = req.body;
+    try {
+    console.log(signature)
+    const signatureString = "You're a verified exceliWorker"
+    const stringEncoded = new TextEncoder().encode(signatureString)
+    const sign = new Uint8Array(Object.values(signature));
+    const pubkey = new PublicKey(publicKey).toBytes()
+
+    const result = nacl.sign.detached.verify(
+        stringEncoded,
+        sign,
+        pubkey
+    )
+    
+    if (!result) {
+        return res.status(401).json({
+            msg:"Invalid User"
+        })
+    }
+    } catch (err) {
+        console.log(err)
+        return res.json({
+            msg: "Bad signature"
+        })
+    }
 
     const existingUser = await prisma.worker.findFirst({
-        where: { address: walletAddress }
+        where: { address: publicKey }
     })
 
     if (existingUser) {
@@ -29,7 +55,7 @@ route.post('/v1/signin', async (req, res) => {
 
         const someUser = await prisma.worker.create({
             data: {
-                address: walletAddress,
+                address: publicKey,
                 pendingAmount: 0,
                 lockedAmount: 0
             }

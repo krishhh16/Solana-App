@@ -1,20 +1,45 @@
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import React from 'react'
+import { BACKEND_URL } from "@/utils/utils";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 function AppBar() {
+  const { publicKey, signMessage } = useWallet();
+
+  async function signAndSend() {
+    try {
+      const message = new TextEncoder().encode(
+        `You're a verified exceliWorker`
+      );
+      const signature = await signMessage?.(message);
+      const response = await axios.post(`${BACKEND_URL}/worker/v1/signin`, {
+        signature,
+        publicKey: publicKey?.toString()
+      });
+
+      localStorage.setItem("token", response.data.token)
+    } catch (err) {
+      alert("Unable to verify User")
+      return
+    }
+  }
+
+  useEffect(() => {
+    signAndSend();
+  }, [publicKey]);
+
   return (
     <div className="flex p-10  justify-between h-[10vh] items-center border-b-[1px]">
-    <div>
-      <h1 className="font-extrabold text-xl">
-        ExcelliPost (Worker)
-      </h1>
+      <div>
+        <h1 className="font-extrabold text-xl">ExcelliPost (Worker)</h1>
+      </div>
+      <div className="flex gap-4 items-center">
+        <h1 className="font-bold ">Connected Wallet :</h1>
+        <WalletMultiButton style={{}} />
+      </div>
     </div>
-    <div className="flex gap-4 items-center">
-      <h1 className="font-bold ">Connected Wallet :</h1>
-      <WalletMultiButton style={{}} />
-    </div>
-  </div>
-  )
+  );
 }
 
-export default AppBar
+export default AppBar;

@@ -5,16 +5,41 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import {BACKEND_URL, CLOUDFRONT_URL} from "../../utils/utils"
 import { LoadingBar } from "./Loading";
+import { SystemProgram, PublicKey, Transaction } from "@solana/web3.js";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 
 function AppComponent() {
+  const {connection } = useConnection();
+  const {publicKey, sendTransaction} = useWallet();
+  const [txSignature, setTxSignature] = useState("");
   const [uploading, setUploading] = useState(false);
   const [topic, setTopic] = useState("Choose the best thumbnail");
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const router = useRouter();
+
   const setTitle = (e: any) => {
     setTopic(e.target.value);
   };
+
+  const makePayment =async () => {
+    const transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: publicKey!,
+        toPubkey: new PublicKey("AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37"),
+        lamports: 100000000
+      })
+    )
+
+    const {
+      context: {slot: minContextSlot},
+      value: {blockhash, lastValidBlockHeight}
+    } = await connection.getLatestBlockhashAndContext();
+
+    const signature = await sendTransaction(transaction, connection, {minContextSlot});
+    await connection.confirmTransaction({blockhash, lastValidBlockHeight, signature});
+    setTxSignature(signature)
+  }
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
@@ -40,10 +65,10 @@ function AppComponent() {
     console.log(response.data)
       
     router.push(`/task/${response.data.id}`)
-  } catch(err) {
+  } catch(err: any) {
     setIsSubmitting(false)
     console.log(err)
-    alert("Some Unexpected error occured", err.messages)
+    alert("Some Unexpected error occured")
 
   }
 
@@ -143,11 +168,11 @@ function AppComponent() {
       </div>
       <div className="w-full flex flex-col items-center mt-10">
         <button 
-          onClick={handleSubmit} 
+          onClick={txSignature ? handleSubmit : makePayment} 
           className="bg-slate-500 w-36 h-10 text-white disabled:bg-slate-300"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Submitting...' : 'Submit Task'}
+          {txSignature ? 'Submit Task' : 'Pay 0.1 SOL'}
         </button>
         {isSubmitting && (
           <div className="w-64 mt-4">

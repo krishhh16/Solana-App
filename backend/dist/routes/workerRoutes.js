@@ -19,13 +19,30 @@ const client_1 = require("@prisma/client");
 const middlewares_1 = require("./middlewares");
 const db_1 = require("../db");
 const types_1 = require("../types/types");
+const tweetnacl_1 = __importDefault(require("tweetnacl"));
+const web3_js_1 = require("@solana/web3.js");
 const route = (0, express_1.Router)();
 exports.TOTAL_DECIMALS = 100000000;
 const prisma = new client_1.PrismaClient();
 route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const walletAddress = "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37";
+    const { publicKey, signature } = req.body;
+    try {
+        console.log(signature);
+        const signatureString = "You're a verified exceliWorker";
+        const stringEncoded = new TextEncoder().encode(signatureString);
+        const sign = new Uint8Array(Object.values(signature));
+        const pubkey = new web3_js_1.PublicKey(publicKey).toBytes();
+        const result = tweetnacl_1.default.sign.detached.verify(stringEncoded, sign, pubkey);
+        console.log(result);
+    }
+    catch (err) {
+        console.log(err);
+        return res.json({
+            msg: "Bad signature"
+        });
+    }
     const existingUser = yield prisma.worker.findFirst({
-        where: { address: walletAddress }
+        where: { address: publicKey }
     });
     if (existingUser) {
         const token = jsonwebtoken_1.default.sign({
@@ -39,7 +56,7 @@ route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, functio
     else {
         const someUser = yield prisma.worker.create({
             data: {
-                address: walletAddress,
+                address: publicKey,
                 pendingAmount: 0,
                 lockedAmount: 0
             }
