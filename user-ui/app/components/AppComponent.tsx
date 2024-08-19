@@ -52,7 +52,7 @@ function AppComponent() {
     const formData = {
         options,
         topic,
-        signature: "0xaaaa"
+        signature: txSignature
     }
 
     const response = await axios.post(`${BACKEND_URL}/user/v1/task`, formData, {

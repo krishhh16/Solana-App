@@ -2,11 +2,14 @@ import { Router } from "express";
 import jwt from "jsonwebtoken"
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { authMiddleWareUser } from "./middlewares";
-
 import { PrismaClient } from "@prisma/client";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { taskUserInput } from "../types/types";
 import { TOTAL_DECIMALS } from "./workerRoutes";
+import {Connection, PublicKey, Transaction} from "@solana/web3.js"
+
+const connection = new Connection("https://solana-devnet.g.alchemy.com/v2/mSOKolKC5DWNK9KeMWIEoN9TxSNWspzy")
+
 const route = Router();
 //@ts-ignore
 const s3Client = new S3Client({
@@ -92,7 +95,21 @@ route.post("/v1/task", authMiddleWareUser, async (req, res) => {
         })
     }
 
-    // Parse the sig here to ensure identity and amount 
+    const transaction = await connection.getTransaction(parseData.data?.signature as string, {
+        maxSupportedTransactionVersion: 1
+    })
+
+    if ((transaction?.meta?.postBalances[1] ?? 0) - (transaction?.meta?.preBalances[1] ?? 0) !== 100000000) {
+        return res.status(411).json({
+            msg: "Transaction signature/amount incorrect"
+        })
+    }
+
+    if (transaction?.transaction.message.getAccountKeys().get(1)?.toString() !== "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37"){
+        return res.status(411).json({
+            msg:"Transaction sent to wrong address"
+        })
+    }
 
     const respone= await prisma.$transaction(async tx => {  
         const response = await tx.task.create({
