@@ -49,7 +49,8 @@ route.post('/v1/signin', async (req, res) => {
         }, process.env.JWT_SECRET_WORKER)
 
         res.json({
-            token
+            token,
+            amount: existingUser.pendingAmount
         })
     } else {
 
@@ -66,7 +67,8 @@ route.post('/v1/signin', async (req, res) => {
         }, process.env.JWT_SECRET_WORKER)
 
         res.json({
-            token
+            token,
+            amount: 0
         })
         }
 

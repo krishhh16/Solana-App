@@ -7,14 +7,13 @@ import { BACKEND_URL } from '@/utils/utils';
 function AppBar() {
   const {publicKey, signMessage} = useWallet();
 
-
   async function signAndSend() {
     try {
       const message = new TextEncoder().encode(
         `You're a verified exceliWorker`
       );
       const signature = await signMessage?.(message);
-      const response = await axios.post(`${BACKEND_URL}/worker/v1/signin`, {
+      const response = await axios.post(`${BACKEND_URL}/user/v1/signin`, {
         signature,
         publicKey: publicKey?.toString()
       });

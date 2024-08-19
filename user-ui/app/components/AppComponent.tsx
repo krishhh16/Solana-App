@@ -170,7 +170,7 @@ function AppComponent() {
         <button 
           onClick={txSignature ? handleSubmit : makePayment} 
           className="bg-slate-500 w-36 h-10 text-white disabled:bg-slate-300"
-          disabled={isSubmitting}
+          disabled={imageUrls.length < 2}
         >
           {txSignature ? 'Submit Task' : 'Pay 0.1 SOL'}
         </button>

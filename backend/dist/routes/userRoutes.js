@@ -20,6 +20,9 @@ const client_1 = require("@prisma/client");
 const s3_presigned_post_1 = require("@aws-sdk/s3-presigned-post");
 const types_1 = require("../types/types");
 const workerRoutes_1 = require("./workerRoutes");
+const web3_js_1 = require("@solana/web3.js");
+const tweetnacl_1 = __importDefault(require("tweetnacl"));
+const connection = new web3_js_1.Connection("https://solana-devnet.g.alchemy.com/v2/mSOKolKC5DWNK9KeMWIEoN9TxSNWspzy");
 const route = (0, express_1.Router)();
 //@ts-ignore
 const s3Client = new client_s3_1.S3Client({
@@ -31,9 +34,28 @@ const s3Client = new client_s3_1.S3Client({
 });
 const prisma = new client_1.PrismaClient();
 route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const walletAddress = "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37";
+    const { publicKey, signature } = req.body;
+    try {
+        console.log(signature);
+        const signatureString = "You're a verified exceliWorker";
+        const stringEncoded = new TextEncoder().encode(signatureString);
+        const sign = new Uint8Array(Object.values(signature));
+        const pubkey = new web3_js_1.PublicKey(publicKey).toBytes();
+        const result = tweetnacl_1.default.sign.detached.verify(stringEncoded, sign, pubkey);
+        if (!result) {
+            return res.status(401).json({
+                msg: "Invalid User"
+            });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.json({
+            msg: "Bad signature"
+        });
+    }
     const existingUser = yield prisma.user.findFirst({
-        where: { address: walletAddress }
+        where: { address: publicKey }
     });
     if (existingUser) {
         const token = jsonwebtoken_1.default.sign({
@@ -47,7 +69,7 @@ route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, functio
     else {
         const someUser = yield prisma.user.create({
             data: {
-                address: walletAddress
+                address: publicKey
             }
         });
         const token = jsonwebtoken_1.default.sign({
@@ -80,6 +102,7 @@ route.get("/v1/getPresignedUrl", middlewares_1.authMiddleWareUser, (req, res) =>
     });
 }));
 route.post("/v1/task", middlewares_1.authMiddleWareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e, _f;
     const body = req.body;
     // @ts-ignore
     const userId = req.userId;
@@ -90,7 +113,19 @@ route.post("/v1/task", middlewares_1.authMiddleWareUser, (req, res) => __awaiter
             msg: "Invalid input type"
         });
     }
-    // Parse the sig here to ensure identity and amount 
+    const transaction = yield connection.getTransaction((_a = parseData.data) === null || _a === void 0 ? void 0 : _a.signature, {
+        maxSupportedTransactionVersion: 1
+    });
+    if (((_c = (_b = transaction === null || transaction === void 0 ? void 0 : transaction.meta) === null || _b === void 0 ? void 0 : _b.postBalances[1]) !== null && _c !== void 0 ? _c : 0) - ((_e = (_d = transaction === null || transaction === void 0 ? void 0 : transaction.meta) === null || _d === void 0 ? void 0 : _d.preBalances[1]) !== null && _e !== void 0 ? _e : 0) !== 100000000) {
+        return res.status(411).json({
+            msg: "Transaction signature/amount incorrect"
+        });
+    }
+    if (((_f = transaction === null || transaction === void 0 ? void 0 : transaction.transaction.message.getAccountKeys().get(1)) === null || _f === void 0 ? void 0 : _f.toString()) !== "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37") {
+        return res.status(411).json({
+            msg: "Transaction sent to wrong address"
+        });
+    }
     const respone = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         const response = yield tx.task.create({

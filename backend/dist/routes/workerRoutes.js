@@ -33,7 +33,11 @@ route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, functio
         const sign = new Uint8Array(Object.values(signature));
         const pubkey = new web3_js_1.PublicKey(publicKey).toBytes();
         const result = tweetnacl_1.default.sign.detached.verify(stringEncoded, sign, pubkey);
-        console.log(result);
+        if (!result) {
+            return res.status(401).json({
+                msg: "Invalid User"
+            });
+        }
     }
     catch (err) {
         console.log(err);
@@ -50,7 +54,8 @@ route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, functio
             //@ts-ignore
         }, process.env.JWT_SECRET_WORKER);
         res.json({
-            token
+            token,
+            amount: existingUser.pendingAmount
         });
     }
     else {
@@ -66,7 +71,8 @@ route.post('/v1/signin', (req, res) => __awaiter(void 0, void 0, void 0, functio
             //@ts-ignore
         }, process.env.JWT_SECRET_WORKER);
         res.json({
-            token
+            token,
+            amount: 0
         });
     }
 }));

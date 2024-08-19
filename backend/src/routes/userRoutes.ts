@@ -7,6 +7,7 @@ import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { taskUserInput } from "../types/types";
 import { TOTAL_DECIMALS } from "./workerRoutes";
 import {Connection, PublicKey, Transaction} from "@solana/web3.js"
+import nacl from "tweetnacl";
 
 const connection = new Connection("https://solana-devnet.g.alchemy.com/v2/mSOKolKC5DWNK9KeMWIEoN9TxSNWspzy")
 
@@ -23,10 +24,35 @@ const s3Client = new S3Client({
 
 const prisma = new PrismaClient()
 route.post('/v1/signin', async (req, res) => {
-    const walletAddress = "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37"
+    const {publicKey, signature} = req.body;
+    try {
+    console.log(signature)
+    const signatureString = "You're a verified exceliWorker"
+    const stringEncoded = new TextEncoder().encode(signatureString)
+    const sign = new Uint8Array(Object.values(signature));
+    const pubkey = new PublicKey(publicKey).toBytes()
+
+    const result = nacl.sign.detached.verify(
+        stringEncoded,
+        sign,
+        pubkey
+    )
+    
+    if (!result) {
+        return res.status(401).json({
+            msg:"Invalid User"
+        })
+    }
+    } catch (err) {
+        console.log(err)
+        return res.json({
+            msg: "Bad signature"
+        })
+    }
+
 
     const existingUser = await prisma.user.findFirst({
-        where: { address: walletAddress }
+        where: { address: publicKey }
     })
 
     if (existingUser) {
@@ -42,7 +68,7 @@ route.post('/v1/signin', async (req, res) => {
     } else {
         const someUser = await prisma.user.create({
             data: {
-                address: walletAddress
+                address: publicKey
             }
         })
         const token = jwt.sign({
