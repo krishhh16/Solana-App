@@ -11,6 +11,6 @@ app.use(cors())
 app.use("/user", userRoute);
 app.use("/worker", workerRoute);
 
-app.listen(3001, () => {
-    console.log('running the server on 3001')
+app.listen(3003, () => {
+    console.log('running the server on 3003')
 })

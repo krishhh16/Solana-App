@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import {BACKEND_URL, CLOUDFRONT_URL} from "../../utils/utils"
 import { LoadingBar } from "./Loading";
 
 function AppComponent() {
@@ -29,7 +30,7 @@ function AppComponent() {
         signature: "0xaaaa"
     }
 
-    const response = await axios.post("http://localhost:3001/user/task", formData, {
+    const response = await axios.post(`${BACKEND_URL}/user/task"`, formData, {
         headers: {
           Authorization:
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTcyNDAxNjQ1MX0._T58FEQ6RuKIpEGriTicNIWOSIli-Rt6Q50AEJpIle0",
@@ -51,7 +52,7 @@ function AppComponent() {
     setUploading(true);
     try {
       const response = await axios.get(
-        `http://localhost:3001/user//v1/getPresignedUrl`,
+        `${BACKEND_URL}/user//v1/getPresignedUrl`,
         {
           headers: {
             Authorization:
@@ -81,7 +82,7 @@ function AppComponent() {
 
       setImageUrls((prevStates) => [
         ...prevStates,
-        `https://d3iizno61g6c3a.cloudfront.net/${response.data.fields.key}`,
+        `${CLOUDFRONT_URL}/${response.data.fields.key}`,
       ]);
       setUploading(false);
     } catch (err) {

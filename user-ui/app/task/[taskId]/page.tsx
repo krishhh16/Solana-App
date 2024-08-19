@@ -5,10 +5,11 @@ import WalletNotConnected from "@/app/components/WalletNotConnected";
 import { useWallet } from "@solana/wallet-adapter-react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import {BACKEND_URL} from "../../../utils/utils"
 
 async function getTasksFromBackend(taskId: string) {
   const response = await axios.get(
-    `http://localhost:3001/user/task?taskId=${taskId}`,
+    `${BACKEND_URL}/user/task?taskId=${taskId}`,
     {
       headers: {
         Authorization:

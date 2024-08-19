@@ -12,6 +12,6 @@ app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.use("/user", userRoutes_1.default);
 app.use("/worker", workerRoutes_1.default);
-app.listen(3001, () => {
-    console.log('running the server on 3001');
+app.listen(3003, () => {
+    console.log('running the server on 3003');
 });
