@@ -102,7 +102,6 @@ route.get("/v1/getPresignedUrl", middlewares_1.authMiddleWareUser, (req, res) =>
     });
 }));
 route.post("/v1/task", middlewares_1.authMiddleWareUser, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f;
     const body = req.body;
     // @ts-ignore
     const userId = req.userId;
@@ -113,19 +112,20 @@ route.post("/v1/task", middlewares_1.authMiddleWareUser, (req, res) => __awaiter
             msg: "Invalid input type"
         });
     }
-    const transaction = yield connection.getTransaction((_a = parseData.data) === null || _a === void 0 ? void 0 : _a.signature, {
-        maxSupportedTransactionVersion: 1
-    });
-    if (((_c = (_b = transaction === null || transaction === void 0 ? void 0 : transaction.meta) === null || _b === void 0 ? void 0 : _b.postBalances[1]) !== null && _c !== void 0 ? _c : 0) - ((_e = (_d = transaction === null || transaction === void 0 ? void 0 : transaction.meta) === null || _d === void 0 ? void 0 : _d.preBalances[1]) !== null && _e !== void 0 ? _e : 0) !== 100000000) {
-        return res.status(411).json({
-            msg: "Transaction signature/amount incorrect"
-        });
-    }
-    if (((_f = transaction === null || transaction === void 0 ? void 0 : transaction.transaction.message.getAccountKeys().get(1)) === null || _f === void 0 ? void 0 : _f.toString()) !== "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37") {
-        return res.status(411).json({
-            msg: "Transaction sent to wrong address"
-        });
-    }
+    /// !!! IMPORTANT :- PLEASE ADD VERIFICATION FOR THE TRANSACTION LIKE SENDER and everything
+    // const transaction = await connection.getTransaction(parseData.data?.signature as string, {
+    //     maxSupportedTransactionVersion: 1
+    // })
+    // if ((transaction?.meta?.postBalances[1] ?? 0) - (transaction?.meta?.preBalances[1] ?? 0) !== 100000000) {
+    //     return res.status(411).json({
+    //         msg: "Transaction signature/amount incorrect"
+    //     })
+    // }
+    // if (transaction?.transaction.message.getAccountKeys().get(1)?.toString() !== "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37"){
+    //     return res.status(411).json({
+    //         msg:"Transaction sent to wrong address"
+    //     })
+    // }
     const respone = yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b;
         const response = yield tx.task.create({

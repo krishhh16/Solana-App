@@ -121,21 +121,23 @@ route.post("/v1/task", authMiddleWareUser, async (req, res) => {
         })
     }
 
-    const transaction = await connection.getTransaction(parseData.data?.signature as string, {
-        maxSupportedTransactionVersion: 1
-    })
+    /// !!! IMPORTANT :- PLEASE ADD VERIFICATION FOR THE TRANSACTION LIKE SENDER and everything
 
-    if ((transaction?.meta?.postBalances[1] ?? 0) - (transaction?.meta?.preBalances[1] ?? 0) !== 100000000) {
-        return res.status(411).json({
-            msg: "Transaction signature/amount incorrect"
-        })
-    }
+    // const transaction = await connection.getTransaction(parseData.data?.signature as string, {
+    //     maxSupportedTransactionVersion: 1
+    // })
 
-    if (transaction?.transaction.message.getAccountKeys().get(1)?.toString() !== "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37"){
-        return res.status(411).json({
-            msg:"Transaction sent to wrong address"
-        })
-    }
+    // if ((transaction?.meta?.postBalances[1] ?? 0) - (transaction?.meta?.preBalances[1] ?? 0) !== 100000000) {
+    //     return res.status(411).json({
+    //         msg: "Transaction signature/amount incorrect"
+    //     })
+    // }
+
+    // if (transaction?.transaction.message.getAccountKeys().get(1)?.toString() !== "AChE4XuUi4SEh7zSZj25mcEFWwWmiESJDoC3Hoy6kj37"){
+    //     return res.status(411).json({
+    //         msg:"Transaction sent to wrong address"
+    //     })
+    // }
 
     const respone= await prisma.$transaction(async tx => {  
         const response = await tx.task.create({
